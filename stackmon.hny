@@ -1,0 +1,33 @@
+from synch import *
+from alloc import malloc, free
+
+def Stack():
+    result = {
+        .top: None, .mutex: BinSema(False),
+        .pop_cond: Condition(), .post_cond: Condition()
+    }
+
+def push(s,v):
+    acquire(?s->mutex)
+    var node = malloc({ .value: v, .next: s->top })
+    s->top = node
+    notify(?s->pop_cond)
+    release(?s->mutex)
+
+def pop(s):
+    acquire(?s->mutex)
+    while (s->top == None):
+        wait(?s->pop_cond, ?s->mutex)
+    var node = s->top
+    result = node->value
+    s->top = node->next
+    free(node)
+    if (s->top == None):
+        notifyAll(?s->post_cond)
+    release(?s->mutex)
+
+def post(s):
+    acquire(?s->mutex)
+    while (s->top != None):
+        wait(?s->post_cond, ?s->mutex)
+    release(?s->mutex)
