@@ -1,0 +1,16 @@
+import list
+
+def Stack():
+    result = []
+
+def push(s, v):
+    atomically !s = [v,] + !s
+
+def pop(s):
+    atomically when (!s != []):
+            result = list.head(!s)
+            !s = list.tail(!s)
+
+def post(s):
+    atomically when (!s == []):
+            pass

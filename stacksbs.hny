@@ -1,0 +1,43 @@
+from synch import BinSema, acquire, release
+from alloc import malloc, free
+
+def Stack():
+    result = {
+        .top : None, .mutex : BinSema(False), 
+        .pop_gate: {.sema : BinSema(True), .count : 0}, 
+        .post_gate: {.sema : BinSema(True), .count : 0} 
+    }
+
+def release_one(s):
+    if (s->top != None) and (s->pop_gate.count > 0):
+        release(?s->pop_gate.sema)
+    elif (s->top == None) and (s->post_gate.count > 0):
+        release(?s->post_gate.sema)
+    else:
+        release(?s->mutex)
+
+def push(s, v):
+    acquire(?s->mutex)
+    var node = malloc({ .value: v, .next: s->top })
+    s->top = node
+    release_one(s)
+
+def pop(s):
+    acquire(?s->mutex)
+    s->pop_gate.count+=1
+    release_one(s)
+    acquire(?s->pop_gate.sema)
+    s->pop_gate.count-=1
+    var node = s->top
+    result = node->value
+    s->top = node->next
+    free(node)
+    release_one(s)
+
+def post(s):
+    acquire(?s->mutex)
+    s->post_gate.count+=1
+    release_one(s)
+    acquire(?s->post_gate.sema)
+    s->post_gate.count-=1
+    release_one(s)
