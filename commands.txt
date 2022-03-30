@@ -1,0 +1,3 @@
+harmony -o stack.hfa stacktest.hny
+harmony -B stack.hfa -m stack=stacksbs stacktest.hny
+harmony -B stack.hfa -m stack=stackmon stacktest.hny
